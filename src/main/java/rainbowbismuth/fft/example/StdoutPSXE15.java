@@ -31,7 +31,7 @@ public class StdoutPSXE15 {
             System.out.println(String.format("  On turn: %s", battleUnit.isTakingTurn()));
 
             if (battleUnit.hasStatus(Status.CHARGING)) {
-                final int abilityId = battleUnit.getLastUseAbilityId();
+                final int abilityId = battleUnit.getLastUsedAbilityId();
                 final String abilityName = abilityNameTable.get(abilityId);
                 System.out.println(String.format(" Charging: %s (ID: %d)", abilityName, abilityId));
 

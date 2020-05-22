@@ -84,7 +84,7 @@ public class BattleUnit {
      * @return The ability ID of this unit's last used, or currently charging ability if they have one of the
      * charging/jumping/performing statuses.
      */
-    public int getLastUseAbilityId() {
+    public int getLastUsedAbilityId() {
         return readShort(LAST_USED_ABILITY_ID);
     }
 
