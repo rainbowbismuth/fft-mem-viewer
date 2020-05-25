@@ -9,7 +9,7 @@ public enum Facing {
     public static final Facing[] VALUES = Facing.values();
     private final int code;
 
-    Facing(int code) {
+    Facing(final int code) {
         this.code = code;
     }
 

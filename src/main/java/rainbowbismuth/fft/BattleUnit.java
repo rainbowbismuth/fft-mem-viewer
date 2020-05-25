@@ -6,16 +6,31 @@ public class BattleUnit {
     public static final int TOTAL_SIZE = NUM_UNITS * SIZE;
 
     private static final int EXISTS = 0x0001;
+    private static final int EXPERIENCE = 0x0021;
     private static final int LEVEL = 0x0022;
+
+    private static final int BRAVE = 0x0024;
+    private static final int FAITH = 0x0026;
+
     private static final int HP = 0x0028;
     private static final int MAX_HP = 0x002A;
     private static final int MP = 0x002C;
     private static final int MAX_MP = 0x002E;
+
+    private static final int SP = 0x0038;
     private static final int CT = 0x0039;
+
+    private static final int MOVE = 0x003A;
+    private static final int JUMP = 0x003B;
+
     private static final int X_COORD = 0x0047;
     private static final int Y_COORD = 0x0048;
     private static final int ELEVATION_FACING = 0x0049;
+
+    private static final int AUTO_STATUS_BYTES = 0x004E;
+    private static final int STATUS_IMMUNITY_BYTES = 0x0053;
     private static final int STATUS_BYTES = 0x0058;
+
     private static final int UNIT_NAME = 0x012C;
     private static final int UNIT_NAME_END = 0x013B;
     private static final int JOB_NAME = 0x013C;
@@ -49,10 +64,14 @@ public class BattleUnit {
     }
 
     /**
-     * @return If this unit exists in the current battle. The rest of the data is gibberish unless this returns true.
+     * @return If this unit exists in the current battle. The rest of the data is gibberish unless this returns false.
      */
-    public boolean exists() {
-        return readByte(EXISTS) != 0xFF;
+    public boolean invalid() {
+        return readByte(EXISTS) == 0xFF;
+    }
+
+    public int getExperience() {
+        return readByte(EXPERIENCE);
     }
 
     public int getLevel() {
@@ -80,6 +99,26 @@ public class BattleUnit {
 
     public int getMaxMP() {
         return readShort(MAX_MP);
+    }
+
+    public int getBrave() {
+        return readByte(BRAVE);
+    }
+
+    public int getFaith() {
+        return readByte(FAITH);
+    }
+
+    public int getSpeed() {
+        return readByte(SP);
+    }
+
+    public int getMove() {
+        return readByte(MOVE);
+    }
+
+    public int getJump() {
+        return readByte(JUMP);
     }
 
     public int getX() {
@@ -122,12 +161,52 @@ public class BattleUnit {
     }
 
     /**
-     * @return True if the unit has the passed in status.
+     * @return True if the unit has the given status applied automatically.
+     */
+    public boolean hasAutoStatus(final Status status) {
+        final int statusByte = readByte(AUTO_STATUS_BYTES + status.getOffset());
+        return (statusByte & status.getFlag()) != 0;
+    }
+
+    /**
+     * @return True if the unit is immune to the given status.
+     */
+    public boolean hasStatusImmunity(final Status status) {
+        final int statusByte = readByte(STATUS_IMMUNITY_BYTES + status.getOffset());
+        return (statusByte & status.getFlag()) != 0;
+    }
+
+    /**
+     * @return True if the unit has the given status.
      */
     public boolean hasStatus(final Status status) {
         final int statusByte = readByte(STATUS_BYTES + status.getOffset());
         return (statusByte & status.getFlag()) != 0;
     }
+
+    private void setStatusInArray(final TacticsInspector inspector, final int statusArrayBegin, final Status status, final boolean value) throws PSMemoryWriteException {
+        final int offset = statusArrayBegin + status.getOffset();
+        final int statusByte = readByte(offset);
+        if (value) {
+            inspector.writeBattleUnitByte(addr(offset), statusByte | status.getFlag());
+        } else {
+            inspector.writeBattleUnitByte(addr(offset), statusByte & (~status.getFlag()));
+        }
+    }
+
+    public void setStatus(final TacticsInspector inspector, final Status status, final boolean value) throws PSMemoryWriteException {
+        setStatusInArray(inspector, STATUS_BYTES, status, value);
+    }
+
+    public void setAutoStatus(final TacticsInspector inspector, final Status status, final boolean value) throws PSMemoryWriteException {
+        setStatusInArray(inspector, AUTO_STATUS_BYTES, status, value);
+    }
+
+
+    public void setStatusImmunity(final TacticsInspector inspector, final Status status, final boolean value) throws PSMemoryWriteException {
+        setStatusInArray(inspector, STATUS_IMMUNITY_BYTES, status, value);
+    }
+
 
     /**
      * @return True if the unit is currently taking their turn.

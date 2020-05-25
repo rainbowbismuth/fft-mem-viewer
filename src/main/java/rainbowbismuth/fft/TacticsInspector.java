@@ -45,5 +45,10 @@ public class TacticsInspector {
         final byte[] memory = this.PSMemory.read(ABILITY_NAME_TABLE_ADDRESS, maxSize);
         return CharacterSet.INSTANCE.readTable(memory, 0, maxSize - 1);
     }
+
+    void writeBattleUnitByte(final int offset, final int value) throws PSMemoryWriteException {
+        final byte[] bytes = new byte[]{(byte) value};
+        this.PSMemory.write(UNIT_STATS_ADDRESS + offset, bytes);
+    }
 }
 

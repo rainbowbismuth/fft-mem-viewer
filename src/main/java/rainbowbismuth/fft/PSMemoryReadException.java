@@ -1,6 +1,6 @@
 package rainbowbismuth.fft;
 
-public class PSMemoryReadException extends Exception {
+public class PSMemoryReadException extends PSMemoryException {
     public PSMemoryReadException(final String message) {
         super(message);
     }

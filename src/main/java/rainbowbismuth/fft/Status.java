@@ -40,19 +40,19 @@ public enum Status {
     REFLECT(4, 0x02),
     DEATH_SENTENCE(4, 0x01);
 
-    private final byte offset;
-    private final byte flag;
+    private final int offset;
+    private final int flag;
 
     Status(final int offset, final int flag) {
         this.offset = (byte) offset;
         this.flag = (byte) flag;
     }
 
-    public byte getOffset() {
+    public int getOffset() {
         return offset;
     }
 
-    public byte getFlag() {
+    public int getFlag() {
         return flag;
     }
 }

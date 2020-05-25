@@ -17,7 +17,7 @@ public class StdoutPSXE15 {
         final List<BattleUnit> battleUnits = fftInspector.readBattleUnits();
 
         for (final BattleUnit unit : battleUnits) {
-            if (!unit.exists()) {
+            if (unit.invalid()) {
                 continue;
             }
 

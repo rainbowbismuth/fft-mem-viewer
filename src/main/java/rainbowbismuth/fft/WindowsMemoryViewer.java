@@ -35,7 +35,7 @@ public class WindowsMemoryViewer implements PSMemory, AutoCloseable {
                 throw new Exception(String.format(
                         "Error code from GetWindowThreadProcessId %s", kernel32.GetLastError()));
             }
-            handle = kernel32.OpenProcess(Kernel32.PROCESS_VM_OPERATION | Kernel32.PROCESS_VM_READ, false, pid);
+            handle = kernel32.OpenProcess(Kernel32.PROCESS_VM_OPERATION | Kernel32.PROCESS_VM_READ | Kernel32.PROCESS_VM_WRITE, false, pid);
             if (handle == null) {
                 throw new Exception(String.format(
                         "Error code from OpenProcess %s", kernel32.GetLastError()));
@@ -52,16 +52,23 @@ public class WindowsMemoryViewer implements PSMemory, AutoCloseable {
         return new WindowsMemoryViewer(lpClassName, lpWindowName, 0x5b5c40);
     }
 
-    private long translateAddress(final long gameAddress) throws PSMemoryReadException {
+    private long translateAddressRead(final long gameAddress) throws PSMemoryReadException {
         if (gameAddress < MIN_ADDRESS) {
             throw new PSMemoryReadException(String.format("Address not mapped: %08X", gameAddress));
         }
         return psRAMOffset + (gameAddress - MIN_ADDRESS);
     }
 
+    private long translateAddressWrite(final long gameAddress) throws PSMemoryWriteException {
+        if (gameAddress < MIN_ADDRESS) {
+            throw new PSMemoryWriteException(String.format("Address not mapped: %08X", gameAddress));
+        }
+        return psRAMOffset + (gameAddress - MIN_ADDRESS);
+    }
+
     @Override
     public byte[] read(final long gameAddress, final int size) throws PSMemoryReadException {
-        final long realAddress = translateAddress(gameAddress);
+        final long realAddress = translateAddressRead(gameAddress);
         final Pointer baseAddressPointer = Pointer.createConstant(realAddress);
         final Memory buffer = new Memory(size);
         if (kernel32.ReadProcessMemory(handle, baseAddressPointer, buffer, size, null)) {
@@ -69,6 +76,19 @@ public class WindowsMemoryViewer implements PSMemory, AutoCloseable {
         } else {
             throw new PSMemoryReadException(String.format(
                     "Couldn't read memory from PID %s, error code: %d, game address: %08X, real address: %08X",
+                    pid, kernel32.GetLastError(), gameAddress, realAddress));
+        }
+    }
+
+    @Override
+    public void write(final long gameAddress, final byte[] memory) throws PSMemoryWriteException {
+        final long realAddress = translateAddressWrite(gameAddress);
+        final Pointer baseAddressPointer = Pointer.createConstant(realAddress);
+        final Memory buffer = new Memory(memory.length);
+        buffer.write(0, memory, 0, memory.length);
+        if (!kernel32.WriteProcessMemory(handle, baseAddressPointer, buffer, memory.length, null)) {
+            throw new PSMemoryWriteException(String.format(
+                    "Couldn't write memory to PID %s, error code: %d, game address: %08X, real address: %08X",
                     pid, kernel32.GetLastError(), gameAddress, realAddress));
         }
     }
