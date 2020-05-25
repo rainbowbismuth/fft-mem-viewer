@@ -12,6 +12,9 @@ public class BattleUnit {
     private static final int MP = 0x002C;
     private static final int MAX_MP = 0x002E;
     private static final int CT = 0x0039;
+    private static final int X_COORD = 0x0047;
+    private static final int Y_COORD = 0x0048;
+    private static final int ELEVATION_FACING = 0x0049;
     private static final int STATUS_BYTES = 0x0058;
     private static final int UNIT_NAME = 0x012C;
     private static final int UNIT_NAME_END = 0x013B;
@@ -37,7 +40,7 @@ public class BattleUnit {
 
     private int readShort(final int offset) {
         final int low = Byte.toUnsignedInt(this.memory[addr(offset)]);
-        final int high = Byte.toUnsignedInt(this.memory[addr(offset+1)]);
+        final int high = Byte.toUnsignedInt(this.memory[addr(offset + 1)]);
         return low + (high << 8);
     }
 
@@ -77,6 +80,23 @@ public class BattleUnit {
 
     public int getMaxMP() {
         return readShort(MAX_MP);
+    }
+
+    public int getX() {
+        return readByte(X_COORD);
+    }
+
+    public int getY() {
+        return readByte(Y_COORD);
+    }
+
+    public boolean isOnHigherElevation() {
+        return (readByte(ELEVATION_FACING) & 0x80) != 0;
+    }
+
+    public Facing getFacing() {
+        final int index = readByte(ELEVATION_FACING) & 0b11;
+        return Facing.VALUES[index];
     }
 
     /**
