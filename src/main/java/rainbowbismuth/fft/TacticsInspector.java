@@ -1,5 +1,6 @@
 package rainbowbismuth.fft;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -26,14 +27,14 @@ public class TacticsInspector {
     /**
      * Read a unit's battle statistics, there are up to 20 units in one battle, and the first 16 correspond to the
      * sixteen ENTD slots.
-     *
-     * @param index An index, 0 to 19 inclusive.
-     * @return A unit that is in the current battle.
      */
-    public BattleUnit readBattleUnit(final int index) throws PSMemoryReadException {
-        final long address = UNIT_STATS_ADDRESS + BattleUnit.SIZE * index;
-        final byte[] memory = this.PSMemory.read(address, BattleUnit.SIZE);
-        return new BattleUnit(memory);
+    public List<BattleUnit> readBattleUnits() throws PSMemoryReadException {
+        final byte[] memory = this.PSMemory.read(UNIT_STATS_ADDRESS, BattleUnit.TOTAL_SIZE);
+        final List<BattleUnit> units = new ArrayList<>(BattleUnit.NUM_UNITS);
+        for (int i = 0; i < BattleUnit.NUM_UNITS; i++) {
+            units.add(new BattleUnit(i, memory));
+        }
+        return units;
     }
 
     /**

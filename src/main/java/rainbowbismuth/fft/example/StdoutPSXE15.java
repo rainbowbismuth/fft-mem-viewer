@@ -14,24 +14,24 @@ public class StdoutPSXE15 {
 
         final TacticsInspector fftInspector = new TacticsInspector(memory);
         final List<String> abilityNameTable = fftInspector.readAbilityNameTable();
+        final List<BattleUnit> battleUnits = fftInspector.readBattleUnits();
 
-        for (int i = 0; i < 20; i++) {
-            final BattleUnit battleUnit = fftInspector.readBattleUnit(i);
-            if (!battleUnit.exists()) {
+        for (final BattleUnit unit : battleUnits) {
+            if (!unit.exists()) {
                 continue;
             }
 
-            System.out.println(String.format("Unit %d (%s, %s)", i, battleUnit.getName(), battleUnit.getJobName()));
-            System.out.println(String.format("    Level: %d", battleUnit.getLevel()));
-            System.out.println(String.format("       CT: %d", battleUnit.getCT()));
-            System.out.println(String.format("   Cur HP: %d", battleUnit.getHP()));
-            System.out.println(String.format("   Max HP: %d", battleUnit.getMaxHP()));
-            System.out.println(String.format("   Cur MP: %d", battleUnit.getMP()));
-            System.out.println(String.format("   Max MP: %d", battleUnit.getMaxMP()));
-            System.out.println(String.format("  On turn: %s", battleUnit.isTakingTurn()));
+            System.out.println(String.format("Unit %d (%s, %s)", unit.getIndex(), unit.getName(), unit.getJobName()));
+            System.out.println(String.format("    Level: %d", unit.getLevel()));
+            System.out.println(String.format("       CT: %d", unit.getCT()));
+            System.out.println(String.format("   Cur HP: %d", unit.getHP()));
+            System.out.println(String.format("   Max HP: %d", unit.getMaxHP()));
+            System.out.println(String.format("   Cur MP: %d", unit.getMP()));
+            System.out.println(String.format("   Max MP: %d", unit.getMaxMP()));
+            System.out.println(String.format("  On turn: %s", unit.isTakingTurn()));
 
-            if (battleUnit.hasStatus(Status.CHARGING)) {
-                final int abilityId = battleUnit.getLastUsedAbilityId();
+            if (unit.hasStatus(Status.CHARGING)) {
+                final int abilityId = unit.getLastUsedAbilityId();
                 final String abilityName = abilityNameTable.get(abilityId);
                 System.out.println(String.format(" Charging: %s (ID: %d)", abilityName, abilityId));
 

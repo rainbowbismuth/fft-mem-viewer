@@ -1,7 +1,10 @@
 package rainbowbismuth.fft;
 
 public class BattleUnit {
+    public static final int NUM_UNITS = 20;
     public static final int SIZE = 448;
+    public static final int TOTAL_SIZE = NUM_UNITS * SIZE;
+
     private static final int EXISTS = 0x0001;
     private static final int LEVEL = 0x0022;
     private static final int HP = 0x0028;
@@ -16,20 +19,30 @@ public class BattleUnit {
     private static final int JOB_NAME_END = 0x0149;
     private static final int LAST_USED_ABILITY_ID = 0x0170;
     private static final int CURRENTLY_UNITS_TURN = 0x0186;
+    private final int index;
     private final byte[] memory;
 
-    public BattleUnit(final byte[] memory) {
+    public BattleUnit(final int index, final byte[] memory) {
+        this.index = index;
         this.memory = memory;
     }
 
+    private int addr(final int offset) {
+        return this.index * SIZE + offset;
+    }
+
     private int readByte(final int offset) {
-        return Byte.toUnsignedInt(this.memory[offset]);
+        return Byte.toUnsignedInt(this.memory[addr(offset)]);
     }
 
     private int readShort(final int offset) {
-        final int low = Byte.toUnsignedInt(this.memory[offset]);
-        final int high = Byte.toUnsignedInt(this.memory[offset + 1]);
+        final int low = Byte.toUnsignedInt(this.memory[addr(offset)]);
+        final int high = Byte.toUnsignedInt(this.memory[addr(offset+1)]);
         return low + (high << 8);
+    }
+
+    public int getIndex() {
+        return index;
     }
 
     /**
@@ -70,14 +83,14 @@ public class BattleUnit {
      * @return The unit's name, e.g. "Rad"
      */
     public String getName() {
-        return CharacterSet.INSTANCE.read(this.memory, UNIT_NAME, UNIT_NAME_END);
+        return CharacterSet.INSTANCE.read(this.memory, addr(UNIT_NAME), addr(UNIT_NAME_END));
     }
 
     /**
      * @return The unit's job, e.g. "Squire"
      */
     public String getJobName() {
-        return CharacterSet.INSTANCE.read(this.memory, JOB_NAME, JOB_NAME_END);
+        return CharacterSet.INSTANCE.read(this.memory, addr(JOB_NAME), addr(JOB_NAME_END));
     }
 
     /**
